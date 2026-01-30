@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scoreApp } from "@/lib/scorer";
+import { scrapeAppStore, fetchFromAPI, mergeData } from "@/lib/scraper";
 
 function extractAppId(url: string): string | null {
   // https://apps.apple.com/us/app/some-name/id123456789
@@ -24,24 +25,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Could not extract app ID from URL. Use format: https://apps.apple.com/us/app/name/id123456789" }, { status: 400 });
     }
 
-    // Fetch from iTunes Lookup API
-    const lookupRes = await fetch(`https://itunes.apple.com/lookup?id=${appId}&country=us`, {
-      next: { revalidate: 3600 },
-    });
+    // Strategy: Scrape first, API fallback, merge both
+    const [scraped, apiData] = await Promise.all([
+      scrapeAppStore(appId),
+      fetchFromAPI(appId),
+    ]);
 
-    if (!lookupRes.ok) {
-      return NextResponse.json({ error: "Failed to fetch app data from App Store" }, { status: 502 });
-    }
-
-    const data = await lookupRes.json();
-    if (!data.results || data.results.length === 0) {
+    const app = mergeData(scraped, apiData);
+    if (!app) {
       return NextResponse.json({ error: "App not found. Check the URL and try again." }, { status: 404 });
     }
 
-    const app = data.results[0];
     const report = scoreApp(app);
 
-    return NextResponse.json(report);
+    return NextResponse.json({
+      ...report,
+      dataSource: app.source,
+      privacyLabels: app.privacyLabels || [],
+      appPreviewUrls: app.appPreviewUrls || [],
+      whatsNew: app.whatsNew || null,
+    });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
