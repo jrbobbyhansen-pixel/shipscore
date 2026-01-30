@@ -83,7 +83,7 @@ function parseAppStorePage(html: string, appId: string): Partial<ScrapedAppData>
       if (ld.operatingSystem) data.minimumOsVersion = ld.operatingSystem;
       if (ld.applicationCategory) {
         data.primaryGenreName = ld.applicationCategory.replace("GameCategory", "Games").replace("Category", "");
-        data.genres = [data.primaryGenreName];
+        data.genres = [data.primaryGenreName!];
       }
       if (ld.aggregateRating) {
         data.averageUserRating = parseFloat(ld.aggregateRating.ratingValue) || 0;

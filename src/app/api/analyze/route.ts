@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scoreApp } from "@/lib/scorer";
 import { scrapeAppStore, fetchFromAPI, mergeData } from "@/lib/scraper";
+import { upsertGalleryEntry } from "@/lib/gallery";
 
 function extractAppId(url: string): string | null {
   // https://apps.apple.com/us/app/some-name/id123456789
@@ -38,8 +39,33 @@ export async function POST(req: NextRequest) {
 
     const report = scoreApp(app);
 
+    // Auto-save to gallery
+    try {
+      upsertGalleryEntry({
+        appId: appId,
+        appName: report.appName,
+        appIcon: report.appIcon,
+        developer: report.developer,
+        overallScore: report.overallScore,
+        grade: report.grade,
+        dimensions: report.dimensions,
+        topImprovements: report.topImprovements,
+        trackViewUrl: app.trackViewUrl || `https://apps.apple.com/us/app/id${appId}`,
+        averageUserRating: app.averageUserRating,
+        userRatingCount: app.userRatingCount,
+        primaryGenreName: app.primaryGenreName,
+      });
+    } catch {
+      // Gallery save failed, don't block response
+    }
+
     return NextResponse.json({
       ...report,
+      appId: appId,
+      trackViewUrl: app.trackViewUrl || `https://apps.apple.com/us/app/id${appId}`,
+      averageUserRating: app.averageUserRating,
+      userRatingCount: app.userRatingCount,
+      primaryGenreName: app.primaryGenreName,
       dataSource: app.source,
       privacyLabels: app.privacyLabels || [],
       appPreviewUrls: app.appPreviewUrls || [],
