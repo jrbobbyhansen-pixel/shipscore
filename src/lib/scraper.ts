@@ -101,48 +101,69 @@ function parseAppStorePage(html: string, appId: string): Partial<ScrapedAppData>
     }
   }
 
-  // --- Screenshots (source sets from picture elements) ---
-  // Deduplicate by base image path (before size suffix like /600x0w.webp)
-  const seenBases = new Set<string>();
+  // --- Screenshots ---
+  // Strategy: extract all mzstatic image URLs, then filter to actual screenshots
+  // and deduplicate by the unique UUID path (ignoring size variants).
+  //
+  // App Store image URL anatomy:
+  //   https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/<uuid>/FILENAME.png/300x650bb-60.jpg
+  //   The UUID+filename combo is the unique image; everything after is a size variant.
+  //
+  // Real screenshots: path contains "PurpleSource" + filename like IMG_xxxx_6.5.png or similar
+  // Noise to exclude: Placeholder.mill, AppIcon, Features (category badges), template {w}x{h}
+
   const screenshotUrls: string[] = [];
   const ipadScreenshotUrls: string[] = [];
+  const seenUUIDs = new Set<string>();
 
-  function getBaseImagePath(url: string): string {
-    // Strip the trailing size/format part: /600x0w.webp, /460x0w.webp, etc.
-    return url.replace(/\/\d+x\d+\w*\.\w+$/, "");
+  // Extract the unique identifier: the UUID + original filename portion
+  function getImageUUID(url: string): string | null {
+    // Match: /v4/<hex>/<hex>/<hex>/<hash>/FILENAME.ext
+    const match = url.match(/\/v4\/([a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9-]+\/[^/]+\.[a-z]+)/i);
+    return match ? match[1] : null;
+  }
+
+  function isScreenshot(url: string): boolean {
+    // Must be a PurpleSource image (actual app screenshots)
+    if (!url.includes("PurpleSource")) return false;
+    // Exclude non-screenshot images
+    if (url.includes("Placeholder")) return false;
+    if (url.includes("AppIcon")) return false;
+    // Exclude template URLs with {w}x{h}
+    if (url.includes("{w}")) return false;
+    return true;
+  }
+
+  function isIPadScreenshot(url: string): boolean {
+    return /iPad|_pad|Simulator_Screenshot.*iPad/i.test(url);
   }
 
   function addScreenshot(u: string) {
-    const base = getBaseImagePath(u);
-    if (seenBases.has(base)) return;
-    seenBases.add(base);
-    // Determine iPhone vs iPad by URL hints
-    if (u.includes("2048") || u.includes("1024") || u.includes("pad")) {
+    if (!isScreenshot(u)) return;
+    const uuid = getImageUUID(u);
+    if (!uuid || seenUUIDs.has(uuid)) return;
+    seenUUIDs.add(uuid);
+
+    // Pick the largest rendered size variant (prefer 600x or 460x)
+    if (isIPadScreenshot(u)) {
       ipadScreenshotUrls.push(u);
     } else {
       screenshotUrls.push(u);
     }
   }
 
-  // Match screenshot source URLs — App Store uses srcset with multiple sizes
+  // Collect all mzstatic image URLs from the page
+  const allImageUrls = html.matchAll(/https:\/\/is\d+-ssl\.mzstatic\.com\/image\/thumb\/[^"'\s><]+/g);
+  for (const m of allImageUrls) {
+    addScreenshot(m[0]);
+  }
+
+  // Also check srcset attributes
   const srcsetMatches = html.matchAll(/srcset="([^"]+)"/g);
   for (const m of srcsetMatches) {
     const urls = m[1].split(",").map((s) => s.trim().split(" ")[0]);
     for (const u of urls) {
-      if (u.includes("mzstatic.com/image") && (u.includes("SS") || u.includes("screen") || u.includes("/Purple"))) {
-        addScreenshot(u);
-      }
-    }
-  }
-
-  // Fallback: grab any image URLs that look like screenshots
-  if (screenshotUrls.length === 0 && ipadScreenshotUrls.length === 0) {
-    const imgMatches = html.matchAll(/https:\/\/is\d+-ssl\.mzstatic\.com\/image\/thumb\/[^"'\s]+/g);
-    for (const m of imgMatches) {
-      const u = m[0];
-      if (u.includes("Purple") && !u.includes("AppIcon") && !u.includes("512x512")) {
-        addScreenshot(u);
-      }
+      addScreenshot(u);
     }
   }
 
