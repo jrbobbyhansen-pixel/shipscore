@@ -1,5 +1,106 @@
 [
   {
+    "appId": "6757414968",
+    "appName": "ChooseGOD: Faithful AI Bible",
+    "appIcon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/59/25/9c/59259cd1-dff2-275e-a6f0-50bf79245361/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
+    "developer": "ROBERT ANTHONY HANSEN",
+    "overallScore": 72,
+    "grade": "B",
+    "dimensions": [
+      {
+        "name": "ASO",
+        "score": 10,
+        "maxScore": 10,
+        "emoji": "🔍",
+        "details": "Title: \"ChooseGOD: Faithful AI Bible\" (28 chars). Description: 2782 chars.",
+        "tip": "ASO looks solid."
+      },
+      {
+        "name": "Screenshots",
+        "score": 4,
+        "maxScore": 10,
+        "emoji": "📸",
+        "details": "6 iPhone + 0 iPad screenshots.",
+        "tip": "Add iPad screenshots to increase device coverage"
+      },
+      {
+        "name": "Pricing",
+        "score": 10,
+        "maxScore": 10,
+        "emoji": "💰",
+        "details": "Price: Free.",
+        "tip": "Free model is great for downloads. Consider in-app purchases for monetization."
+      },
+      {
+        "name": "Reviews",
+        "score": 6,
+        "maxScore": 10,
+        "emoji": "⭐",
+        "details": "5.0 stars from 2 ratings.",
+        "tip": "Very few reviews. Implement smart review prompts after positive moments."
+      },
+      {
+        "name": "Update Cadence",
+        "score": 9,
+        "maxScore": 10,
+        "emoji": "🔄",
+        "details": "Last updated 16 days ago (v1.1).",
+        "tip": "Great update frequency."
+      },
+      {
+        "name": "Accessibility",
+        "score": 7,
+        "maxScore": 10,
+        "emoji": "♿",
+        "details": "1 languages, 122 devices, rated 4+.",
+        "tip": "Single language only — localization can 2-3x downloads."
+      },
+      {
+        "name": "Privacy & Security",
+        "score": 5,
+        "maxScore": 10,
+        "emoji": "🔒",
+        "details": "Category: Education. 0 content advisories.",
+        "tip": "Privacy labels aren't available via public API — get full analysis with a detailed report."
+      },
+      {
+        "name": "Legal",
+        "score": 5,
+        "maxScore": 10,
+        "emoji": "⚖️",
+        "details": "Developer: ROBERT ANTHONY HANSEN. Website: None.",
+        "tip": "No developer website found. Add one with privacy policy and terms."
+      },
+      {
+        "name": "Category Ranking",
+        "score": 6,
+        "maxScore": 10,
+        "emoji": "📈",
+        "details": "2 ratings in Education. Estimated from public signals.",
+        "tip": "Very low visibility. You need marketing and ASO optimization urgently."
+      },
+      {
+        "name": "Stability",
+        "score": 10,
+        "maxScore": 10,
+        "emoji": "💎",
+        "details": "File size: 44MB. Last update: 16d ago.",
+        "tip": "Crash data isn't public — this score is estimated from update frequency and ratings."
+      }
+    ],
+    "topImprovements": [
+      "Add iPad screenshots to increase device coverage",
+      "Privacy labels aren't available via public API — get full analysis with a detailed report.",
+      "No developer website found. Add one with privacy policy and terms."
+    ],
+    "trackViewUrl": "https://apps.apple.com/us/app/choosegod-faithful-ai-bible/id6757414968?uo=4",
+    "averageUserRating": 5,
+    "userRatingCount": 2,
+    "primaryGenreName": "Education",
+    "slug": "choosegod-faithful-ai-bible",
+    "scannedAt": "2026-01-30T17:47:13.754Z"
+  },
+  {
     "appId": "570060128",
     "appName": "Duolingo - Language Lessons",
     "appIcon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/5b/3b/0a/5b3b0a2b-7f47-0b66-8494-a154cdef8e62/AppIcon-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg",
