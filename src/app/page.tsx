@@ -30,12 +30,6 @@ export default function Home() {
         "https://twitter.com/squadopsai"
       ]
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "127",
-      "bestRating": "5"
-    },
     "featureList": [
       "App Store Optimization (ASO) analysis",
       "Screenshot and visual asset scoring",
