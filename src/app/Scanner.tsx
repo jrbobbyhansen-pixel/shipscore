@@ -93,7 +93,7 @@ export default function Scanner() {
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <input
           type="url"
-          placeholder="Paste an App Store URL (e.g. https://apps.apple.com/...)"
+          placeholder="Paste an App Store or Google Play URL..."
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && analyze()}
@@ -182,7 +182,13 @@ export default function Scanner() {
 
       {!report && !loading && (
         <div className="text-center text-sm text-[var(--text-muted)] mt-16 space-y-4">
-          <p>Supports Apple App Store URLs • Google Play coming soon</p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--border)]">
+            <span>🍎</span>
+            <span>Apple App Store</span>
+            <span className="text-[var(--border)]">|</span>
+            <span>▶️</span>
+            <span>Google Play</span>
+          </div>
           <p className="text-xs">
             Built by <a href="https://squadops.com" className="text-[var(--accent-glow)] hover:underline" target="_blank">SquadOps</a> — App launch experts
           </p>
