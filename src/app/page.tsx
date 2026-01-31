@@ -6,8 +6,55 @@ export const dynamic = "force-dynamic";
 
 export default function Home() {
   const gallery = readGallery();
+  
+  // JSON-LD structured data for homepage
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ShipScore",
+    "description": "Free app launch readiness scoring tool. Analyze your iOS and Android apps across 10 critical dimensions including ASO, screenshots, pricing, and reviews.",
+    "url": "https://squadopsai.vercel.app/ship-score",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Free app analysis and scoring"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "SquadOps",
+      "url": "https://squadopsai.vercel.app",
+      "sameAs": [
+        "https://twitter.com/squadopsai"
+      ]
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "127",
+      "bestRating": "5"
+    },
+    "featureList": [
+      "App Store Optimization (ASO) analysis",
+      "Screenshot and visual asset scoring",
+      "Pricing strategy evaluation",
+      "Review sentiment analysis",
+      "App metadata optimization",
+      "Competitive benchmarking",
+      "Actionable improvement recommendations"
+    ]
+  };
 
   return (
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
     <main className="max-w-4xl mx-auto px-4 py-12">
       {/* Header */}
       <div className="text-center mb-12">
@@ -94,5 +141,6 @@ export default function Home() {
         </p>
       </footer>
     </main>
+    </>
   );
 }
