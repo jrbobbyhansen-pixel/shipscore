@@ -348,16 +348,16 @@ export default function Scanner() {
               Get a detailed report with actionable fixes for every dimension, competitive analysis, and ASO keyword recommendations.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="https://squadops.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://squadopsai.vercel.app" target="_blank" rel="noopener noreferrer"
                 className="inline-block px-6 py-3 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-glow)] text-white font-semibold transition-colors">
                 Full Report — $97
               </a>
-              <a href="https://squadops.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://squadopsai.vercel.app" target="_blank" rel="noopener noreferrer"
                 className="inline-block px-6 py-3 rounded-lg border border-[var(--accent)] text-[var(--accent-glow)] hover:bg-[var(--accent)]/10 font-semibold transition-colors">
                 Done-for-You Fixes — $297
               </a>
             </div>
-            <p className="text-xs text-[var(--text-muted)]">Powered by <a href="https://squadops.com" className="text-[var(--accent-glow)] hover:underline" target="_blank">SquadOps</a></p>
+            <p className="text-xs text-[var(--text-muted)]">Powered by <a href="https://squadopsai.vercel.app" className="text-[var(--accent-glow)] hover:underline" target="_blank">SquadOps</a></p>
           </div>
 
           <p className="text-center text-xs text-[var(--text-muted)] pt-4">
@@ -376,7 +376,7 @@ export default function Scanner() {
             <span>Google Play</span>
           </div>
           <p className="text-xs">
-            Built by <a href="https://squadops.com" className="text-[var(--accent-glow)] hover:underline" target="_blank">SquadOps</a> — App launch experts
+            Built by <a href="https://squadopsai.vercel.app" className="text-[var(--accent-glow)] hover:underline" target="_blank">SquadOps</a> — App launch experts
           </p>
         </div>
       )}

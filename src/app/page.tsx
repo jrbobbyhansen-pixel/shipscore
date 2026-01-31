@@ -127,7 +127,7 @@ export default function Home() {
         <p>
           Powered by{" "}
           <a
-            href="https://squadops.com"
+            href="https://squadopsai.vercel.app"
             className="text-[var(--accent-glow)] hover:underline"
             target="_blank"
             rel="noopener noreferrer"
