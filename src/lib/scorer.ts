@@ -41,7 +41,7 @@ export interface DimensionScore {
 export function scoreApp(app: AppData) {
   const dimensions: DimensionScore[] = [
     scoreASO(app),
-    scoreScreenshots(app),
+    scoreVisualAssets(app), // Enhanced from just screenshots
     scorePricing(app),
     scoreReviews(app),
     scoreUpdateCadence(app),
@@ -49,16 +49,49 @@ export function scoreApp(app: AppData) {
     scorePrivacy(app),
     scoreLegal(app),
     scoreCategoryRanking(app),
-    scoreCrashIndicators(app),
+    scoreAppIcon(app), // New: App icon analysis
   ];
 
-  const totalScore = dimensions.reduce((sum, d) => sum + d.score, 0);
-  const maxTotal = dimensions.reduce((sum, d) => sum + d.maxScore, 0);
-  const overallScore = Math.round((totalScore / maxTotal) * 100);
-  const grade = overallScore >= 90 ? "A+" : overallScore >= 80 ? "A" : overallScore >= 70 ? "B" : overallScore >= 60 ? "C" : overallScore >= 50 ? "D" : "F";
+  // Apply weighted scoring for more realistic results
+  const weights: { [key: string]: number } = {
+    "ASO": 0.20,              // 20% - Most critical for discovery
+    "Visual Assets": 0.15,    // 15% - Critical for conversion
+    "Reviews": 0.15,          // 15% - Trust and ranking factor
+    "App Icon": 0.12,         // 12% - First impression
+    "Category Ranking": 0.10, // 10% - Market position
+    "Pricing": 0.10,          // 10% - Strategy impact
+    "Update Cadence": 0.08,   // 8% - Health indicator
+    "Accessibility": 0.05,    // 5% - Market reach
+    "Privacy & Security": 0.03, // 3% - Basic requirement
+    "Legal": 0.02,            // 2% - Basic requirement
+  };
 
-  // Top 3 improvements: lowest scoring dimensions
-  const sorted = [...dimensions].sort((a, b) => (a.score / a.maxScore) - (b.score / b.maxScore));
+  let weightedScore = 0;
+  let totalWeight = 0;
+
+  dimensions.forEach(dim => {
+    const weight = weights[dim.name] || 0.1;
+    const percentage = (dim.score / dim.maxScore);
+    weightedScore += percentage * weight;
+    totalWeight += weight;
+  });
+
+  const overallScore = Math.round((weightedScore / totalWeight) * 100);
+  
+  // Adjusted grading scale for more meaningful differentiation
+  const grade = overallScore >= 92 ? "A+" : 
+               overallScore >= 85 ? "A" : 
+               overallScore >= 75 ? "B" : 
+               overallScore >= 65 ? "C" : 
+               overallScore >= 55 ? "D" : "F";
+
+  // Top 3 improvements: lowest scoring dimensions weighted by importance
+  const sorted = [...dimensions].sort((a, b) => {
+    const aWeighted = (a.score / a.maxScore) * (weights[a.name] || 0.1);
+    const bWeighted = (b.score / b.maxScore) * (weights[b.name] || 0.1);
+    return aWeighted - bWeighted;
+  });
+  
   const topImprovements = sorted.slice(0, 3).map(d => d.tip || `Improve your ${d.name} score.`);
 
   return {
@@ -81,50 +114,178 @@ export function scorePlayApp(app: AppData) {
 
 function scoreASO(app: AppData): DimensionScore {
   let score = 0;
-  const max = 10;
+  const max = 100; // Increased for more granular scoring
   const tips: string[] = [];
+  const title = app.trackName || "";
+  const description = app.description || "";
 
-  // Title length (30 chars ideal for App Store)
-  if (app.trackName.length >= 10 && app.trackName.length <= 30) score += 3;
-  else if (app.trackName.length > 0) { score += 1; tips.push("Optimize title to 10-30 chars with keywords"); }
+  // Title optimization (25 points total)
+  if (title.length >= 15 && title.length <= 30) {
+    score += 15; // Sweet spot
+  } else if (title.length >= 10 && title.length <= 40) {
+    score += 12;
+    tips.push("Optimize title length to 15-30 characters for best visibility");
+  } else if (title.length > 0) {
+    score += 8;
+    tips.push("Title should be 15-30 characters with primary keywords");
+  }
 
-  // Description length
-  const descLen = app.description?.length || 0;
-  if (descLen >= 500) score += 3;
-  else if (descLen >= 200) { score += 2; tips.push("Expand description to 500+ chars for better ASO"); }
-  else { tips.push("Description is too short — aim for 500+ characters with keywords"); }
+  // Keyword density in title (10 points)
+  const hasKeywords = /\b(app|free|pro|best|top|easy|quick|fast|new)\b/i.test(title);
+  if (hasKeywords) {
+    score += 10;
+  } else {
+    tips.push("Include relevant keywords in your app title");
+    score += 5; // Partial credit
+  }
 
-  // Has paragraph breaks / formatting
-  if (app.description?.includes("\n\n")) score += 2;
-  else tips.push("Add paragraph breaks to description for readability");
+  // Description optimization (35 points total)
+  const descLen = description.length;
+  if (descLen >= 800) {
+    score += 20;
+  } else if (descLen >= 500) {
+    score += 18;
+    tips.push("Expand description to 800+ characters for better keyword coverage");
+  } else if (descLen >= 200) {
+    score += 12;
+    tips.push("Description too short — aim for 800+ characters with keywords");
+  } else {
+    score += 5;
+    tips.push("Critical: Description must be at least 500 characters for ASO");
+  }
 
-  // Multiple genres
-  if (app.genres?.length >= 2) score += 2;
-  else { score += 1; tips.push("Consider adding secondary category"); }
+  // Description structure and formatting (15 points)
+  const hasBullets = /[•\-\*]|\d+\./.test(description);
+  const hasBreaks = description.includes("\n");
+  const hasEmojis = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(description);
+  
+  if (hasBreaks && hasBullets) score += 15;
+  else if (hasBreaks || hasBullets) { score += 10; tips.push("Add bullet points and line breaks for better description formatting"); }
+  else { score += 5; tips.push("Structure description with bullet points and paragraphs"); }
 
-  return { name: "ASO", score, maxScore: max, emoji: "🔍", details: `Title: "${app.trackName}" (${app.trackName.length} chars). Description: ${descLen} chars.`, tip: tips[0] || "ASO looks solid." };
+  if (hasEmojis) score += 3; // Small bonus for visual appeal
+
+  // Category optimization (15 points)
+  if (app.genres?.length >= 2) {
+    score += 15;
+  } else {
+    score += 8;
+    tips.push("Add a secondary category to increase discoverability");
+  }
+
+  // Localization signals (10 points)
+  const langCount = app.languageCodesISO2A?.length || 1;
+  if (langCount >= 10) score += 10;
+  else if (langCount >= 5) { score += 8; tips.push("Localize for more languages to expand keyword reach"); }
+  else if (langCount >= 3) { score += 6; }
+  else { score += 3; tips.push("Localization is critical for ASO — start with Spanish, French, German"); }
+
+  // Normalize to 10-point scale for consistency with other dimensions
+  const normalizedScore = Math.round((score / max) * 10);
+  
+  return { 
+    name: "ASO", 
+    score: normalizedScore, 
+    maxScore: 10, 
+    emoji: "🔍", 
+    details: `Title: ${title.length} chars, Description: ${descLen} chars, ${langCount} languages`, 
+    tip: tips[0] || "Strong ASO foundation — continue optimizing keywords and descriptions" 
+  };
 }
 
-function scoreScreenshots(app: AppData): DimensionScore {
+function scoreVisualAssets(app: AppData): DimensionScore {
   let score = 0;
   const max = 10;
   const iphoneCount = app.screenshotUrls?.length || 0;
   const ipadCount = app.ipadScreenshotUrls?.length || 0;
-  let tip = "";
+  const tips: string[] = [];
 
-  if (iphoneCount >= 8) score += 5;
-  else if (iphoneCount >= 5) score += 4;
-  else if (iphoneCount >= 3) { score += 2; tip = "Add more screenshots — aim for 8+ iPhone screenshots"; }
-  else { tip = "Screenshots are critical — add at least 5 iPhone screenshots"; }
+  // iPhone screenshots (0-6 points)
+  if (iphoneCount >= 8) {
+    score += 6;
+  } else if (iphoneCount >= 5) {
+    score += 5;
+    tips.push("Add 3+ more iPhone screenshots to maximize conversion potential");
+  } else if (iphoneCount >= 3) {
+    score += 3;
+    tips.push("Need at least 5 iPhone screenshots — each one increases conversion rates");
+  } else if (iphoneCount > 0) {
+    score += 1;
+    tips.push("Critical: Add more iPhone screenshots (minimum 5, ideal 8-10)");
+  } else {
+    tips.push("No screenshots detected — this will kill conversion rates");
+  }
 
-  if (ipadCount >= 3) score += 3;
-  else if (ipadCount > 0) { score += 1; tip = tip || "Add more iPad screenshots for universal app credibility"; }
-  else { tip = tip || "Add iPad screenshots to increase device coverage"; }
+  // iPad screenshots (0-2 points)
+  if (ipadCount >= 5) {
+    score += 2;
+  } else if (ipadCount >= 3) {
+    score += 1.5;
+    tips.push("Add 2+ more iPad screenshots for better universal app appeal");
+  } else if (ipadCount > 0) {
+    score += 1;
+    tips.push("Add more iPad screenshots — tablet users have higher LTV");
+  } else {
+    tips.push("Add iPad screenshots to appeal to tablet users (higher engagement)");
+  }
 
-  // Bonus for having enough variety
-  if (iphoneCount + ipadCount >= 10) score += 2;
+  // Portfolio completeness bonus (0-2 points)
+  const totalAssets = iphoneCount + ipadCount;
+  if (totalAssets >= 12) {
+    score += 2;
+  } else if (totalAssets >= 8) {
+    score += 1.5;
+  } else if (totalAssets >= 6) {
+    score += 1;
+  }
 
-  return { name: "Screenshots", score: Math.min(score, max), maxScore: max, emoji: "📸", details: `${iphoneCount} iPhone + ${ipadCount} iPad screenshots.`, tip: tip || "Great screenshot coverage." };
+  return { 
+    name: "Visual Assets", 
+    score: Math.min(Math.round(score), max), 
+    maxScore: max, 
+    emoji: "📸", 
+    details: `${iphoneCount} iPhone + ${ipadCount} iPad screenshots`, 
+    tip: tips[0] || "Excellent visual asset portfolio" 
+  };
+}
+
+function scoreAppIcon(app: AppData): DimensionScore {
+  let score = 5; // Base score since we can't analyze the actual icon design
+  const max = 10;
+  let tip = "Icon quality analysis requires manual review — ensure it's clear, distinctive, and follows platform guidelines";
+
+  // We can make some inferences from the icon URL structure
+  const iconUrl = app.artworkUrl512 || "";
+  
+  if (iconUrl.includes("512x512")) {
+    score += 2; // Good resolution indicator
+  }
+
+  // If the app has high ratings, likely the icon is decent
+  if (app.averageUserRating >= 4.5 && app.userRatingCount >= 100) {
+    score += 2;
+    tip = "High user ratings suggest good visual design including icon — keep it consistent";
+  } else if (app.averageUserRating >= 4.0 && app.userRatingCount >= 50) {
+    score += 1;
+    tip = "Good ratings but consider A/B testing your icon for higher conversion rates";
+  } else {
+    tip = "Low ratings may indicate visual issues — consider redesigning your app icon";
+  }
+
+  // Apps in Design/Photography categories typically have better visual design
+  const designCategories = ["Photo & Video", "Design", "Graphics & Design"];
+  if (designCategories.includes(app.primaryGenreName)) {
+    score += 1;
+  }
+
+  return { 
+    name: "App Icon", 
+    score: Math.min(score, max), 
+    maxScore: max, 
+    emoji: "🎨", 
+    details: `Primary category: ${app.primaryGenreName}`, 
+    tip 
+  };
 }
 
 function scorePricing(app: AppData): DimensionScore {
@@ -146,23 +307,73 @@ function scorePricing(app: AppData): DimensionScore {
 function scoreReviews(app: AppData): DimensionScore {
   let score = 0;
   const max = 10;
-  let tip = "";
+  const tips: string[] = [];
   const rating = app.averageUserRating || 0;
   const count = app.userRatingCount || 0;
 
-  // Rating quality
-  if (rating >= 4.5) score += 5;
-  else if (rating >= 4.0) { score += 4; tip = "Good rating! Focus on fixing common complaints to hit 4.5+"; }
-  else if (rating >= 3.5) { score += 2; tip = "Address negative reviews. Aim for 4.0+ rating."; }
-  else { tip = "Rating needs improvement. Prioritize bug fixes and user feedback."; }
+  // Rating quality (0-6 points) - More granular scoring
+  if (rating >= 4.7) {
+    score += 6;
+  } else if (rating >= 4.5) {
+    score += 5.5;
+    tips.push("Excellent rating! Focus on maintaining quality and gathering more reviews");
+  } else if (rating >= 4.2) {
+    score += 4.5;
+    tips.push("Strong rating. Address top complaints to reach 4.5+ stars");
+  } else if (rating >= 4.0) {
+    score += 3.5;
+    tips.push("Good rating but needs improvement. Analyze negative reviews and fix pain points");
+  } else if (rating >= 3.7) {
+    score += 2.5;
+    tips.push("Below average rating. Urgent: fix bugs and usability issues");
+  } else if (rating >= 3.0) {
+    score += 1.5;
+    tips.push("Poor rating indicates serious issues. Major quality improvements needed");
+  } else if (rating > 0) {
+    score += 0.5;
+    tips.push("Critical rating issues. Consider major app redesign and quality improvements");
+  } else {
+    tips.push("No ratings yet. Implement review prompts and focus on user retention");
+  }
 
-  // Rating volume
-  if (count >= 10000) score += 5;
-  else if (count >= 1000) { score += 4; tip = tip || "Good review volume. Use in-app prompts to increase ratings."; }
-  else if (count >= 100) { score += 2; tip = tip || "Increase review volume with SKStoreReviewController prompts."; }
-  else { score += 1; tip = tip || "Very few reviews. Implement smart review prompts after positive moments."; }
+  // Rating volume (0-4 points) - Social proof factor
+  if (count >= 50000) {
+    score += 4;
+  } else if (count >= 10000) {
+    score += 3.5;
+    tips.push("Strong review volume. Optimize review prompts for even more social proof");
+  } else if (count >= 5000) {
+    score += 3;
+    tips.push("Good review volume. Use in-app review prompts to increase ratings");
+  } else if (count >= 1000) {
+    score += 2.5;
+    tips.push("Moderate review volume. Implement smart review requests after positive actions");
+  } else if (count >= 500) {
+    score += 2;
+    tips.push("Low review volume. Add SKStoreReviewController prompts strategically");
+  } else if (count >= 100) {
+    score += 1.5;
+    tips.push("Very few reviews. Focus on user engagement and review acquisition");
+  } else if (count >= 20) {
+    score += 1;
+    tips.push("Minimal reviews. Implement review prompts and improve user experience");
+  } else if (count > 0) {
+    score += 0.5;
+    tips.push("Almost no reviews. Critical: implement review requests and fix retention");
+  }
 
-  return { name: "Reviews", score, maxScore: max, emoji: "⭐", details: `${rating.toFixed(1)} stars from ${count.toLocaleString()} ratings.`, tip: tip || "Excellent review profile." };
+  // Rating velocity bonus (estimated)
+  const ratingDensity = count > 0 ? rating * Math.log10(count + 1) : 0;
+  if (ratingDensity > 15) score += 0.5; // Bonus for high engagement
+
+  return { 
+    name: "Reviews", 
+    score: Math.min(Math.round(score * 10) / 10, max), 
+    maxScore: max, 
+    emoji: "⭐", 
+    details: `${rating.toFixed(1)} stars from ${count.toLocaleString()} ratings`, 
+    tip: tips[0] || "Outstanding review profile — maintain this excellence" 
+  };
 }
 
 function scoreUpdateCadence(app: AppData): DimensionScore {
@@ -282,23 +493,4 @@ function scoreCategoryRanking(app: AppData): DimensionScore {
   return { name: "Category Ranking", score: Math.min(score, max), maxScore: max, emoji: "📈", details: `${count.toLocaleString()} ratings in ${app.primaryGenreName}. Estimated from public signals.`, tip: tip || "Strong category presence." };
 }
 
-function scoreCrashIndicators(app: AppData): DimensionScore {
-  let score = 6; // Default — can't directly measure crashes from API
-  const max = 10;
-  let tip = "Crash data isn't public — this score is estimated from update frequency and ratings.";
-
-  // Recent updates suggest active bug fixing
-  const daysSince = Math.floor((Date.now() - new Date(app.currentVersionReleaseDate).getTime()) / (1000 * 60 * 60 * 24));
-  if (daysSince <= 30) score += 2;
-  else if (daysSince <= 90) score += 1;
-
-  // Good ratings suggest fewer crashes
-  if (app.averageUserRating >= 4.5) score += 2;
-  else if (app.averageUserRating >= 4.0) score += 1;
-
-  // File size — very large apps may have more issues
-  const sizeMB = parseInt(app.fileSizeBytes || "0") / (1024 * 1024);
-  if (sizeMB > 500) { score -= 1; tip = "Large app size (500MB+) correlates with more crash vectors. Optimize bundle size."; }
-
-  return { name: "Stability", score: Math.min(score, max), maxScore: max, emoji: "💎", details: `File size: ${sizeMB.toFixed(0)}MB. Last update: ${daysSince}d ago.`, tip };
-}
+// Removed scoreCrashIndicators - replaced with scoreAppIcon for more actionable insights
