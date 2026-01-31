@@ -60,60 +60,246 @@ function DimensionBar({ dim }: { dim: DimensionScore }) {
   );
 }
 
+type LoadingStage = "validating" | "fetching" | "analyzing" | "generating";
+
 export default function Scanner() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<LoadingStage>("validating");
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState("");
+  const [isValidUrl, setIsValidUrl] = useState<boolean | null>(null);
+
+  // Real-time URL validation
+  function validateUrl(inputUrl: string): boolean {
+    if (!inputUrl.trim()) return false;
+    
+    const appStorePattern = /^https:\/\/apps\.apple\.com\/.+/;
+    const playStorePattern = /^https:\/\/play\.google\.com\/store\/apps\/details\?id=.+/;
+    
+    return appStorePattern.test(inputUrl) || playStorePattern.test(inputUrl);
+  }
+
+  function handleUrlChange(newUrl: string) {
+    setUrl(newUrl);
+    setError("");
+    if (newUrl.trim()) {
+      setIsValidUrl(validateUrl(newUrl));
+    } else {
+      setIsValidUrl(null);
+    }
+  }
+
+  function clearInput() {
+    setUrl("");
+    setError("");
+    setReport(null);
+    setIsValidUrl(null);
+  }
 
   async function analyze() {
     setError("");
     setReport(null);
-    if (!url.trim()) { setError("Paste an App Store URL to get started"); return; }
+    
+    if (!url.trim()) { 
+      setError("Please paste an App Store or Google Play URL to get started"); 
+      return; 
+    }
+    
+    if (!validateUrl(url)) {
+      setError("Please enter a valid App Store or Google Play URL");
+      return;
+    }
+    
     setLoading(true);
+    
     try {
+      // Stage 1: Validating
+      setLoadingStage("validating");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Stage 2: Fetching
+      setLoadingStage("fetching");
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Stage 3: Analyzing
+      setLoadingStage("analyzing");
+      
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: url.trim() }),
       });
+      
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Analysis failed");
+      
+      // Stage 4: Generating report
+      setLoadingStage("generating");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       setReport(data);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      let errorMessage = "Something went wrong. Please try again.";
+      
+      if (e instanceof Error) {
+        if (e.message.includes("fetch")) {
+          errorMessage = "Network error. Please check your connection and try again.";
+        } else if (e.message.includes("404")) {
+          errorMessage = "App not found. Please check the URL and try again.";
+        } else if (e.message.includes("rate limit")) {
+          errorMessage = "Too many requests. Please wait a moment and try again.";
+        } else {
+          errorMessage = e.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   }
 
+  const getLoadingMessage = () => {
+    switch (loadingStage) {
+      case "validating": return "Validating URL...";
+      case "fetching": return "Fetching app data...";
+      case "analyzing": return "Analyzing across 10 dimensions...";
+      case "generating": return "Generating your report...";
+      default: return "Processing...";
+    }
+  };
+
+  const getLoadingProgress = () => {
+    switch (loadingStage) {
+      case "validating": return 25;
+      case "fetching": return 50;
+      case "analyzing": return 75;
+      case "generating": return 95;
+      default: return 0;
+    }
+  };
+
   return (
     <>
-      {/* Input */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-8">
-        <input
-          type="url"
-          placeholder="Paste an App Store or Google Play URL..."
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && analyze()}
-          className="flex-1 px-4 py-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
-        />
-        <button
-          onClick={analyze}
-          disabled={loading}
-          className="px-6 py-3 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-glow)] text-white font-semibold transition-colors disabled:opacity-50 whitespace-nowrap cursor-pointer"
-        >
-          {loading ? "Analyzing..." : "Score My App"}
-        </button>
+      {/* Input Section */}
+      <div className="space-y-4 mb-8">
+        <div className="relative">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <input
+                type="url"
+                placeholder="Paste an App Store or Google Play URL..."
+                value={url}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !loading && analyze()}
+                disabled={loading}
+                className={`w-full px-4 py-3 pr-12 rounded-lg bg-[var(--bg-card)] border text-[var(--text)] placeholder-[var(--text-muted)] focus:outline-none transition-all duration-200 ${
+                  isValidUrl === false 
+                    ? "border-red-400 focus:border-red-400" 
+                    : isValidUrl === true 
+                      ? "border-green-400 focus:border-green-400" 
+                      : "border-[var(--border)] focus:border-[var(--accent)]"
+                } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+              />
+              
+              {/* URL Validation Indicator */}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {url.trim() && (
+                  <div className="text-lg">
+                    {isValidUrl === true ? "✅" : isValidUrl === false ? "❌" : ""}
+                  </div>
+                )}
+              </div>
+              
+              {/* Clear Button */}
+              {url && !loading && (
+                <button
+                  onClick={clearInput}
+                  className="absolute right-10 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
+                  type="button"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            
+            <button
+              onClick={analyze}
+              disabled={loading || !url.trim() || isValidUrl === false}
+              className="px-8 py-3 rounded-lg bg-gradient-to-r from-[var(--accent)] to-purple-600 hover:from-[var(--accent-glow)] hover:to-purple-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-lg hover:shadow-xl"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  <span>Analyzing...</span>
+                </div>
+              ) : (
+                "🚀 Score My App"
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* URL Format Help */}
+        {url && isValidUrl === false && (
+          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50">
+            <p className="text-red-800 dark:text-red-200 text-sm flex items-center gap-2">
+              <span>⚠️</span>
+              <span>Please enter a valid URL. Examples:</span>
+            </p>
+            <div className="mt-2 space-y-1 text-xs text-red-700 dark:text-red-300">
+              <div>• App Store: https://apps.apple.com/us/app/your-app/id123456789</div>
+              <div>• Google Play: https://play.google.com/store/apps/details?id=com.yourapp</div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {error && <p className="text-center text-red-400 mb-6">{error}</p>}
+      {/* Error Display */}
+      {error && (
+        <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 mb-6">
+          <p className="text-red-800 dark:text-red-200 text-sm flex items-center gap-2">
+            <span>❌</span>
+            <span>{error}</span>
+          </p>
+        </div>
+      )}
 
+      {/* Enhanced Loading State */}
       {loading && (
-        <div className="text-center py-16">
-          <div className="inline-block w-10 h-10 border-4 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mb-4" />
-          <p className="text-[var(--text-muted)]">Analyzing your app across 10 dimensions...</p>
+        <div className="text-center py-16 space-y-6">
+          <div className="relative w-32 h-32 mx-auto">
+            {/* Outer spinning ring */}
+            <div className="absolute inset-0 border-4 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin"></div>
+            {/* Inner progress ring */}
+            <div className="absolute inset-2 border-2 border-transparent border-t-purple-500 rounded-full animate-spin" style={{ animationDuration: '1.5s' }}></div>
+            {/* Center icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-3xl animate-pulse">🔬</div>
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="max-w-md mx-auto">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-[var(--text)]">{getLoadingMessage()}</span>
+              <span className="text-xs text-[var(--text-muted)]">{getLoadingProgress()}%</span>
+            </div>
+            <div className="h-2 bg-[var(--border)] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[var(--accent)] to-purple-500 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${getLoadingProgress()}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Loading Tips */}
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 max-w-md mx-auto">
+            <p className="text-blue-800 dark:text-blue-200 text-sm">
+              💡 <strong>Did you know?</strong> We analyze metadata, screenshots, reviews, pricing strategy, and 6 other key factors that impact your app's success.
+            </p>
+          </div>
         </div>
       )}
 
