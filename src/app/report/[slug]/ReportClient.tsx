@@ -65,51 +65,125 @@ export default function ReportClient({ entry }: { entry: GalleryEntry }) {
         <ScoreRing score={entry.overallScore} />
       </div>
 
-      {/* Grade Badge */}
-      <div className="text-center mb-8">
-        <span className="inline-block px-5 py-1.5 rounded-full text-lg font-bold border-2" style={{ borderColor: gc, color: gc }}>
-          Grade: {entry.grade}
-        </span>
-        {entry.averageUserRating != null && (
-          <p className="text-sm text-[var(--text-muted)] mt-2">
-            ⭐ {entry.averageUserRating.toFixed(1)} ({(entry.userRatingCount || 0).toLocaleString()} ratings)
-          </p>
-        )}
+      {/* Score Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="text-center p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
+          <div className="text-3xl font-bold mb-1" style={{ color: gc }}>
+            {entry.grade}
+          </div>
+          <div className="text-sm text-[var(--text-muted)]">Overall Grade</div>
+        </div>
+        <div className="text-center p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
+          <div className="text-3xl font-bold mb-1">
+            {entry.overallScore}
+            <span className="text-lg text-[var(--text-muted)]">/100</span>
+          </div>
+          <div className="text-sm text-[var(--text-muted)]">Launch Score</div>
+        </div>
+        <div className="text-center p-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
+          {entry.averageUserRating != null ? (
+            <>
+              <div className="text-3xl font-bold mb-1">
+                ⭐ {entry.averageUserRating.toFixed(1)}
+              </div>
+              <div className="text-sm text-[var(--text-muted)]">
+                {(entry.userRatingCount || 0).toLocaleString()} reviews
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-3xl font-bold mb-1 text-[var(--text-muted)]">—</div>
+              <div className="text-sm text-[var(--text-muted)]">No reviews yet</div>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Top Improvements */}
-      <div className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--accent)]/30 mb-8">
-        <h2 className="font-bold mb-3 text-[var(--accent-glow)]">🎯 Top 3 Improvements</h2>
-        <ol className="space-y-2">
+      {/* Priority Improvements */}
+      <div className="p-8 rounded-xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 border border-orange-200 dark:border-orange-800/50 mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center font-bold">
+            🎯
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Priority Improvements</h2>
+        </div>
+        <div className="space-y-4">
           {entry.topImprovements.map((tip, i) => (
-            <li key={i} className="flex gap-3 text-sm">
-              <span className="text-[var(--accent)] font-bold">{i + 1}.</span>
-              <span>{tip}</span>
-            </li>
+            <div key={i} className="flex gap-4 p-4 rounded-lg bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm border border-orange-200/50 dark:border-orange-800/30">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white flex items-center justify-center font-bold text-sm">
+                {i + 1}
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-800 dark:text-gray-200 leading-relaxed">{tip}</p>
+              </div>
+            </div>
           ))}
-        </ol>
+        </div>
+        <div className="mt-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50">
+          <p className="text-blue-800 dark:text-blue-200 text-sm flex items-center gap-2">
+            <span>💡</span>
+            <span>Need help implementing these improvements? Our experts can help you execute these recommendations and boost your app's performance.</span>
+          </p>
+        </div>
       </div>
 
-      {/* Dimensions */}
-      <h2 className="font-bold text-lg mb-4">📊 Dimension Breakdown</h2>
-      <div className="grid gap-3 mb-8">
-        {entry.dimensions.map((dim, i) => {
-          const pct = (dim.score / dim.maxScore) * 100;
-          const barColor = pct >= 80 ? "bg-green-500" : pct >= 60 ? "bg-yellow-500" : "bg-red-500";
-          return (
-            <div key={i} className="p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border)] hover:border-[var(--accent)] transition-colors">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-medium">{dim.emoji} {dim.name}</span>
-                <span className="text-sm font-mono text-[var(--text-muted)]">{dim.score}/{dim.maxScore}</span>
+      {/* Detailed Breakdown */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white flex items-center justify-center font-bold">
+            📊
+          </div>
+          <h2 className="text-xl font-bold">Detailed Breakdown</h2>
+        </div>
+        <div className="grid gap-4">
+          {entry.dimensions.map((dim, i) => {
+            const pct = (dim.score / dim.maxScore) * 100;
+            const barColor = pct >= 80 ? "from-green-500 to-emerald-500" : pct >= 60 ? "from-yellow-500 to-orange-500" : "from-red-500 to-red-600";
+            const bgColor = pct >= 80 ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/50" : 
+                           pct >= 60 ? "bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800/50" : 
+                           "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/50";
+            
+            return (
+              <div key={i} className={`p-6 rounded-xl ${bgColor} border transition-all duration-200 hover:shadow-md`}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{dim.emoji}</span>
+                    <div>
+                      <h3 className="font-semibold text-lg">{dim.name}</h3>
+                      <p className="text-sm text-[var(--text-muted)] mt-1">{dim.details}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{dim.score}</div>
+                    <div className="text-sm text-[var(--text-muted)]">/ {dim.maxScore}</div>
+                  </div>
+                </div>
+                
+                <div className="mb-3">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Score</span>
+                    <span className="font-mono">{Math.round(pct)}%</span>
+                  </div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full bg-gradient-to-r ${barColor} transition-all duration-1000 ease-out`} 
+                      style={{ width: `${pct}%` }} 
+                    />
+                  </div>
+                </div>
+                
+                {dim.tip && (
+                  <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50">
+                    <p className="text-blue-800 dark:text-blue-200 text-sm flex items-start gap-2">
+                      <span className="text-base">💡</span>
+                      <span>{dim.tip}</span>
+                    </p>
+                  </div>
+                )}
               </div>
-              <div className="h-2 bg-[var(--border)] rounded-full overflow-hidden mb-2">
-                <div className={`h-full rounded-full ${barColor} transition-all duration-1000`} style={{ width: `${pct}%` }} />
-              </div>
-              <p className="text-xs text-[var(--text-muted)]">{dim.details}</p>
-              {dim.tip && <p className="text-xs text-[var(--accent-glow)] mt-1">💡 {dim.tip}</p>}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* App Store Link */}
@@ -159,15 +233,36 @@ export default function ReportClient({ entry }: { entry: GalleryEntry }) {
         </div>
       </div>
 
-      {/* CTA */}
+      {/* Expert Help CTA */}
+      <div className="p-8 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800/50 text-center space-y-6 mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-2xl mb-4">
+          🚀
+        </div>
+        <div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Need Expert Help?</h3>
+          <p className="text-gray-600 dark:text-gray-300 max-w-lg mx-auto leading-relaxed">
+            Get personalized launch strategy, ASO optimization, and conversion rate improvements from our team of app growth experts.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <a href="https://squadopsai.vercel.app/pricing" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+            <span>Get Expert Help</span>
+            <span>→</span>
+          </a>
+          <span className="text-sm text-gray-500 dark:text-gray-400">Starting at $497/month</span>
+        </div>
+      </div>
+
+      {/* Scan Another App CTA */}
       <div className="p-6 rounded-xl bg-gradient-to-br from-[var(--accent)]/10 to-purple-900/20 border border-[var(--accent)]/30 text-center space-y-4">
-        <h3 className="text-xl font-bold">🚀 Scan Your App</h3>
+        <h3 className="text-xl font-bold">🔍 Scan Another App</h3>
         <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
-          Get a free launch readiness score across 10 dimensions in seconds.
+          Compare scores or analyze your competition. Free launch readiness scoring for any App Store or Google Play app.
         </p>
         <a href="/"
           className="inline-block px-6 py-3 rounded-lg bg-[var(--accent)] hover:bg-[var(--accent-glow)] text-white font-semibold transition-colors">
-          Score My App
+          Score Another App
         </a>
       </div>
 
