@@ -243,6 +243,111 @@ export async function fetchFromAPI(appId: string): Promise<ScrapedAppData | null
   }
 }
 
+// ─── Google Play Scraper ────────────────────────────────────────────
+
+export function extractPlayId(url: string): string | null {
+  const match = url.match(/[?&]id=([a-zA-Z0-9._]+)/);
+  return match ? match[1] : null;
+}
+
+export function isGooglePlay(url: string): boolean {
+  return url.includes("play.google.com");
+}
+
+export async function fetchPlayStoreData(packageId: string): Promise<ScrapedAppData> {
+  const res = await fetch(
+    `https://play.google.com/store/apps/details?id=${packageId}&hl=en&gl=us`,
+    {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to fetch Google Play page");
+  const html = await res.text();
+
+  const getMetaContent = (name: string) => {
+    const m = html.match(
+      new RegExp(
+        `<meta\\s[^>]*(?:name|property)=["']${name}["'][^>]*content=["']([^"']*)["']`,
+        "i"
+      )
+    );
+    return m ? m[1] : "";
+  };
+
+  const title =
+    getMetaContent("og:title") || getMetaContent("twitter:title") || packageId;
+  const description =
+    getMetaContent("og:description") || getMetaContent("description") || "";
+  const appIcon = getMetaContent("og:image") || "";
+
+  const ratingMatch =
+    html.match(/Rated\s+([\d.]+)\s+stars/i) ||
+    html.match(/"ratingValue":\s*"?([\d.]+)"?/);
+  const rating = ratingMatch ? parseFloat(ratingMatch[1]) : 0;
+
+  const ratingCountMatch =
+    html.match(/"ratingCount":\s*"?(\d+)"?/) ||
+    html.match(/([\d,]+)\s+reviews/i);
+  const ratingCount = ratingCountMatch
+    ? parseInt(ratingCountMatch[1].replace(/,/g, ""))
+    : 0;
+
+  const developerMatch =
+    html.match(/"author":\s*\{[^}]*"name":\s*"([^"]+)"/) ||
+    html.match(/class="Vbfug auoIOc"[^>]*><a[^>]*>([^<]+)/);
+  const developer = developerMatch ? developerMatch[1] : "Unknown Developer";
+
+  const updatedMatch =
+    html.match(/Updated on\s*<\/b>\s*([^<]+)/i) ||
+    html.match(/"dateModified":\s*"([^"]+)"/);
+  const lastUpdated = updatedMatch ? updatedMatch[1].trim() : "";
+
+  const screenshotMatches =
+    html.match(
+      /https:\/\/play-lh\.googleusercontent\.com\/[^"'\s]+(?:=w\d+-h\d+)/g
+    ) || [];
+  const screenshots = [...new Set(screenshotMatches)].slice(0, 20);
+
+  return {
+    trackName: title
+      .replace(/ - Apps on Google Play$/i, "")
+      .replace(/ - Google Play$/i, ""),
+    artistName: developer,
+    artworkUrl512: appIcon,
+    description,
+    price: 0,
+    averageUserRating: rating,
+    userRatingCount: ratingCount,
+    screenshotUrls: screenshots,
+    ipadScreenshotUrls: [],
+    genres: ["App"],
+    primaryGenreName: "App",
+    fileSizeBytes: "0",
+    currentVersionReleaseDate: lastUpdated
+      ? new Date(lastUpdated).toISOString()
+      : new Date().toISOString(),
+    releaseDate: "",
+    version: "1.0",
+    trackContentRating: "Everyone",
+    advisories: [],
+    sellerUrl: `https://play.google.com/store/apps/developer?id=${encodeURIComponent(developer)}`,
+    supportedDevices: [],
+    languageCodesISO2A: ["EN"],
+    minimumOsVersion: "",
+    releaseNotes: "",
+    formattedPrice: "Free",
+    isGameCenterEnabled: false,
+    trackViewUrl: `https://play.google.com/store/apps/details?id=${packageId}`,
+    contentAdvisoryRating: "Everyone",
+    source: "scraper",
+  };
+}
+
+// ─── Merge Helpers ──────────────────────────────────────────────────
+
 /**
  * Merge scraped data with API data. Scraper wins for fields it found.
  */

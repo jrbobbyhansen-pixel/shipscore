@@ -72,6 +72,13 @@ export function scoreApp(app: AppData) {
   };
 }
 
+export function scorePlayApp(app: AppData) {
+  return {
+    ...scoreApp(app),
+    platform: "google_play" as const,
+  };
+}
+
 function scoreASO(app: AppData): DimensionScore {
   let score = 0;
   const max = 10;
