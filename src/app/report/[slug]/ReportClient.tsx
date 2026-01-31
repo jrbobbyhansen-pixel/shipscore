@@ -218,18 +218,86 @@ export default function ReportClient({ entry }: { entry: GalleryEntry }) {
       </div>
 
       {/* Embed Badge */}
-      <div className="p-5 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] mb-8">
-        <h3 className="font-bold mb-3">🏷️ Embed Badge</h3>
-        <div className="mb-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={badgeUrl} alt={`ShipScore: ${entry.overallScore}/100`} className="h-8" />
+      <div className="p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 border border-gray-200 dark:border-gray-700 mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center font-bold">
+            🏷️
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Show Off Your Score</h3>
         </div>
-        <div className="relative">
-          <code className="block p-3 rounded bg-[var(--bg)] text-xs text-[var(--text-muted)] overflow-x-auto">{embedSnippet}</code>
-          <button onClick={() => copyText(embedSnippet, "embed")}
-            className="absolute top-2 right-2 px-2 py-1 rounded text-xs bg-[var(--border)] hover:bg-[var(--bg-card-hover)] cursor-pointer">
-            {copied === "embed" ? "✓" : "Copy"}
-          </button>
+        
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-6">
+          Add this badge to your website, GitHub README, or app listing to showcase your ShipScore rating.
+        </p>
+        
+        <div className="space-y-4">
+          {/* Badge Preview */}
+          <div className="p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+            <h4 className="font-semibold text-sm mb-2 text-gray-700 dark:text-gray-300">Preview</h4>
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={badgeUrl} alt={`ShipScore: ${entry.overallScore}/100`} className="h-5" />
+              <span className="text-xs text-gray-500">Standard size</span>
+            </div>
+          </div>
+
+          {/* HTML Embed Code */}
+          <div className="relative">
+            <h4 className="font-semibold text-sm mb-2 text-gray-700 dark:text-gray-300">HTML Embed Code</h4>
+            <div className="relative">
+              <pre className="p-4 rounded-lg bg-gray-900 text-green-400 text-xs overflow-x-auto border">
+                <code>{`<a href="${reportUrl}" target="_blank">
+  <img src="https://squadopsai.vercel.app/ship-score${badgeUrl}" 
+       alt="ShipScore: ${entry.overallScore}/100" />
+</a>`}</code>
+              </pre>
+              <button 
+                onClick={() => copyText(`<a href="${reportUrl}" target="_blank"><img src="https://squadopsai.vercel.app/ship-score${badgeUrl}" alt="ShipScore: ${entry.overallScore}/100" /></a>`, "html")}
+                className="absolute top-2 right-2 px-3 py-1 rounded text-xs bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+              >
+                {copied === "html" ? "✓ Copied!" : "📋 Copy HTML"}
+              </button>
+            </div>
+          </div>
+
+          {/* Markdown Embed Code */}
+          <div className="relative">
+            <h4 className="font-semibold text-sm mb-2 text-gray-700 dark:text-gray-300">Markdown (GitHub README)</h4>
+            <div className="relative">
+              <pre className="p-4 rounded-lg bg-gray-900 text-blue-400 text-xs overflow-x-auto border">
+                <code>{`[![ShipScore](https://squadopsai.vercel.app/ship-score${badgeUrl})](${reportUrl})`}</code>
+              </pre>
+              <button 
+                onClick={() => copyText(`[![ShipScore](https://squadopsai.vercel.app/ship-score${badgeUrl})](${reportUrl})`, "markdown")}
+                className="absolute top-2 right-2 px-3 py-1 rounded text-xs bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+              >
+                {copied === "markdown" ? "✓ Copied!" : "📋 Copy Markdown"}
+              </button>
+            </div>
+          </div>
+
+          {/* Direct Image URL */}
+          <div className="relative">
+            <h4 className="font-semibold text-sm mb-2 text-gray-700 dark:text-gray-300">Direct Image URL</h4>
+            <div className="relative">
+              <pre className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs overflow-x-auto border">
+                <code>{`https://squadopsai.vercel.app/ship-score${badgeUrl}`}</code>
+              </pre>
+              <button 
+                onClick={() => copyText(`https://squadopsai.vercel.app/ship-score${badgeUrl}`, "url")}
+                className="absolute top-2 right-2 px-3 py-1 rounded text-xs bg-gray-600 hover:bg-gray-500 text-white transition-colors"
+              >
+                {copied === "url" ? "✓ Copied!" : "📋 Copy URL"}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50">
+            <p className="text-blue-800 dark:text-blue-200 text-xs flex items-start gap-2">
+              <span className="text-sm">💡</span>
+              <span>Badges update automatically when you re-scan your app. Perfect for showing continuous improvement in your development process!</span>
+            </p>
+          </div>
         </div>
       </div>
 
