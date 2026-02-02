@@ -1,15 +1,15 @@
 [
-  {"name":"Vibe Coding Tools","score":61,"grade":"D","issue":"No localization","slug":"/ship-score/vibe-coding-tools","date":"2026-01-31T00:00:00Z"},
-  {"name":"Vibe Coding Builder","score":75,"grade":"B","issue":"Partial IAP","slug":"/ship-score/vibe-coding-builder","date":"2026-01-31T00:00:00Z"},
-  {"name":"Street Vibe Builder","score":70,"grade":"B","issue":"Screenshots missing for iPad","slug":"/ship-score/street-vibe-builder","date":"2026-01-31T00:00:00Z"},
-  {"name":"MyFitnessPal","score":69,"grade":"C","issue":"No IAP—add premium tier","slug":"/ship-score/myfitnesspal","date":"2026-02-02T00:00:00Z"},
-  {"name":"Calm","score":72,"grade":"B","issue":"Single lang—localize","slug":"/ship-score/calm","date":"2026-02-02T00:00:00Z"},
-  {"name":"Strava","score":65,"grade":"C","issue":"Update overdue","slug":"/ship-score/strava","date":"2026-02-02T00:00:00Z"},
-  {"name":"Fitbit","score":68,"grade":"C","issue":"iPad screenshots missing","slug":"/ship-score/fitbit","date":"2026-02-02T00:00:00Z"},
-  {"name":"Headspace","score":66,"grade":"C","issue":"Privacy labels incomplete","slug":"/ship-score/headspace","date":"2026-02-02T00:00:00Z"},
-  {"name":"Noom","score":74,"grade":"B","issue":"Limited 3D Touch","slug":"/ship-score/noom","date":"2026-02-02T00:00:00Z"},
-  {"name":"Lose It!","score":71,"grade":"B","issue":"App Clip missing","slug":"/ship-score/lose-it","date":"2026-02-02T00:00:00Z"},
-  {"name":"Nike Training Club","score":78,"grade":"B","issue":"Dark mode incomplete","slug":"/ship-score/nike-tc","date":"2026-02-02T00:00:00Z"},
-  {"name":"MyNetDiary","score":73,"grade":"B","issue":"Share sheet limited","slug":"/ship-score/mynetdiary","date":"2026-02-02T00:00:00Z"},
-  {"name":"Lifesum","score":70,"grade":"B","issue":"No offline mode","slug":"/ship-score/lifesum","date":"2026-02-02T00:00:00Z"}
+  {"name":"Vibe Coding Tools","score":61,"grade":"D","issue":"No localization","slug":"/ship-score/vibe-coding-tools","date":"2026-01-31T00:00:00.000Z"},
+  {"name":"Vibe Coding Builder","score":75,"grade":"B","issue":"Partial IAP","slug":"/ship-score/vibe-coding-builder","date":"2026-01-31T00:00:00.000Z"},
+  {"name":"Street Vibe Builder","score":70,"grade":"B","issue":"Screenshots missing for iPad","slug":"/ship-score/street-vibe-builder","date":"2026-01-31T00:00:00.000Z"},
+  {"name":"MyFitnessPal","score":69,"grade":"C","issue":"No IAP—add premium tier","slug":"/ship-score/myfitnesspal","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Calm","score":72,"grade":"B","issue":"Single lang—localize","slug":"/ship-score/calm","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Strava","score":65,"grade":"C","issue":"Update overdue","slug":"/ship-score/strava","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Fitbit","score":68,"grade":"C","issue":"iPad screenshots missing","slug":"/ship-score/fitbit","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Headspace","score":66,"grade":"C","issue":"Privacy labels incomplete","slug":"/ship-score/headspace","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Noom","score":74,"grade":"B","issue":"Limited 3D Touch","slug":"/ship-score/noom","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Lose It!","score":71,"grade":"B","issue":"App Clip missing","slug":"/ship-score/lose-it","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Nike Training Club","score":78,"grade":"B","issue":"Dark mode incomplete","slug":"/ship-score/nike-tc","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"MyNetDiary","score":73,"grade":"B","issue":"Share sheet limited","slug":"/ship-score/mynetdiary","date":"2026-02-02T06:00:00.000Z"},
+  {"name":"Lifesum","score":70,"grade":"B","issue":"No offline mode","slug":"/ship-score/lifesum","date":"2026-02-02T06:00:00.000Z"}
 ]
