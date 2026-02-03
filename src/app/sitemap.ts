@@ -3,7 +3,7 @@ import { readGallery } from '@/lib/gallery';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const gallery = readGallery();
-  const baseUrl = 'https://squadopsai.vercel.app/ship-score';
+  const baseUrl = `https://${process.env.VERCEL_URL ?? 'shipscore.vercel.app'}`;
   
   // Static pages
   const staticPages = [
@@ -15,11 +15,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   ];
 
-  // Dynamic report pages
+  // Dynamic ShipScore pages
   const reportPages = gallery.map((entry) => ({
-    url: `${baseUrl}/report/${entry.slug}`,
-    lastModified: new Date(entry.scannedAt),
-    changeFrequency: 'monthly' as const,
+    url: `${baseUrl}${entry.slug}`,
+    lastModified: new Date(entry.date),
+    changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
 

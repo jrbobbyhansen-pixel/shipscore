@@ -1,72 +1,29 @@
-import fs from "fs";
-import path from "path";
+import galleryData from '../data/gallery.json';
 
 export interface GalleryEntry {
-  appId: string;
-  appName: string;
-  appIcon: string;
-  developer: string;
-  overallScore: number;
+  name: string;
+  score: number;
+  overallScore?: number;
   grade: string;
-  dimensions: {
-    name: string;
-    score: number;
-    maxScore: number;
-    emoji: string;
-    details: string;
-    tip: string;
-  }[];
-  topImprovements: string[];
-  scannedAt: string;
+  issue: string;
   slug: string;
-  trackViewUrl: string;
-  averageUserRating?: number;
-  userRatingCount?: number;
-  primaryGenreName?: string;
-}
-
-const GALLERY_PATH = path.join(process.cwd(), "src/data/gallery.json");
-
-function toSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  date: string;
+  appId?: string;
+  appName?: string;
+  appIcon?: string;
+  developer?: string;
 }
 
 export function readGallery(): GalleryEntry[] {
-  try {
-    const raw = fs.readFileSync(GALLERY_PATH, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
+  return galleryData as GalleryEntry[];
 }
 
-export function writeGallery(entries: GalleryEntry[]): void {
-  fs.writeFileSync(GALLERY_PATH, JSON.stringify(entries, null, 2));
+export function findBySlug(slug: string): GalleryEntry | null {
+  return readGallery().find((item) => item.slug === slug) || null;
 }
 
-export function upsertGalleryEntry(entry: Omit<GalleryEntry, "slug" | "scannedAt"> & { appId: string }): GalleryEntry {
-  const gallery = readGallery();
-  const slug = toSlug(entry.appName);
-  const full: GalleryEntry = {
-    ...entry,
-    slug,
-    scannedAt: new Date().toISOString(),
-  };
-
-  const idx = gallery.findIndex((e) => e.appId === entry.appId);
-  if (idx >= 0) {
-    gallery[idx] = full;
-  } else {
-    gallery.unshift(full);
-  }
-
-  writeGallery(gallery);
-  return full;
-}
-
-export function findBySlug(slug: string): GalleryEntry | undefined {
-  return readGallery().find((e) => e.slug === slug);
+export async function upsertGalleryEntry(entry: any): Promise<any> {
+  // TODO: Persist to database (Vercel Postgres, Upstash, etc.)
+  console.log('Upsert gallery entry (stub):', entry);
+  return entry;
 }
